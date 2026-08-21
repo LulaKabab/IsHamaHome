@@ -367,12 +367,9 @@
     </div>
 
     <script>
-      // ---- the fixed logic: no loop, works for any date in either direction ----
       const CYCLE = 4;
-      const ANCHOR_UTC = Date.UTC(2026, 7, 12); // last known working day
+      const ANCHOR_UTC = Date.UTC(2026, 7, 12);
 
-      // Day difference measured on calendar days via UTC, so DST or time-of-day
-      // can never make a "day" come out as anything but a whole number.
       function dayDiff(date) {
         const d = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
         return Math.round((d - ANCHOR_UTC) / 86400000);
@@ -380,7 +377,7 @@
 
       function isWorking(date) {
         const diff = dayDiff(date);
-        return ((diff % CYCLE) + CYCLE) % CYCLE === 0; // negative-safe modulo
+        return ((diff % CYCLE) + CYCLE) % CYCLE === 0;
       }
 
       function daysUntilWork(date) {
@@ -388,7 +385,6 @@
         return m === 0 ? 0 : CYCLE - m;
       }
 
-      // ---- UI wiring ----
       const input = document.getElementById("date");
       const verdict = document.getElementById("verdict");
       const answer = document.getElementById("answer");
@@ -420,7 +416,7 @@
 
       function fromInputValue(v) {
         const [y, m, d] = v.split("-").map(Number);
-        return new Date(y, m - 1, d); // local midnight, no UTC parsing surprises
+        return new Date(y, m - 1, d);
       }
 
       function addDays(d, n) {
@@ -431,13 +427,13 @@
         if (!input.value) return;
         const picked = fromInputValue(input.value);
         const working = isWorking(picked);
-        const cycleDay = (((dayDiff(picked) % CYCLE) + CYCLE) % CYCLE) + 1; // 1..3
+        const cycleDay = (((dayDiff(picked) % CYCLE) + CYCLE) % CYCLE) + 1;
 
         dateLine.textContent = fmtLong.format(picked);
         verdict.classList.toggle("work", working);
         verdict.classList.toggle("home", !working);
-        stamp.textContent = "day " + cycleDay + " of " + CYCLE;
-
+        // stamp.textContent = "day " + cycleDay + " of " + CYCLE;
+        stamp.textContent = "S.S.D.D";
         if (working) {
           answer.textContent = "Hama is working";
           const next = addDays(picked, CYCLE);
@@ -455,7 +451,6 @@
 
         assume.classList.toggle("show", dayDiff(picked) < 0);
 
-        // rhythm strip: picked date +/- 4 days
         strip.innerHTML = "";
         for (let i = -4; i <= 4; i++) {
           const d = addDays(picked, i);
@@ -480,7 +475,6 @@
         render();
       });
 
-      // start on today
       input.value = toInputValue(new Date());
       render();
     </script>
