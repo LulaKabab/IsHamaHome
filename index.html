@@ -1,0 +1,488 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Is Hama working?</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --paper: #edf1f2;
+        --card: #ffffff;
+        --ink: #14232e;
+        --ink-soft: #5b6b77;
+        --line: #cfd9de;
+        --work: #1d5fbf;
+        --work-deep: #164a96;
+        --home: #2f7d4f;
+        --home-deep: #24623d;
+        --ring: #14232e;
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html {
+        -webkit-text-size-adjust: 100%;
+      }
+      body {
+        background: var(--paper);
+        color: var(--ink);
+        font-family: "IBM Plex Sans", system-ui, sans-serif;
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        padding: clamp(16px, 4vw, 48px) clamp(12px, 4vw, 32px);
+        background-image:
+          linear-gradient(var(--line) 1px, transparent 1px),
+          linear-gradient(90deg, var(--line) 1px, transparent 1px);
+        background-size: 32px 32px;
+        background-position: -1px -1px;
+      }
+      .sheet {
+        width: 100%;
+        max-width: 640px;
+      }
+      /* ---------- header ---------- */
+      header {
+        margin-bottom: clamp(20px, 4vw, 32px);
+      }
+      .eyebrow {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 12px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--ink-soft);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 10px;
+      }
+      .eyebrow::before {
+        content: "";
+        width: 22px;
+        height: 2px;
+        background: var(--ink);
+        flex: none;
+      }
+      h1 {
+        font-family: "Zilla Slab", serif;
+        font-weight: 700;
+        font-size: clamp(30px, 6vw, 44px);
+        line-height: 1.05;
+      }
+      .rota-note {
+        margin-top: 10px;
+        color: var(--ink-soft);
+        font-size: 14px;
+        max-width: 46ch;
+      }
+      .rota-note b {
+        color: var(--ink);
+        font-weight: 600;
+      }
+      /* ---------- picker ---------- */
+      .picker {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 16px;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: end;
+        gap: 14px;
+        box-shadow: 0 1px 0 rgba(20, 35, 46, 0.06);
+      }
+      .field {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        flex: 1 1 200px;
+      }
+      label {
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: var(--ink-soft);
+      }
+      input[type="date"] {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 16px;
+        color: var(--ink);
+        background: var(--paper);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 10px 12px;
+        width: 100%;
+      }
+      input[type="date"]:focus-visible,
+      button:focus-visible {
+        outline: 2px solid var(--work);
+        outline-offset: 2px;
+      }
+      button.today {
+        font:
+          600 14px "IBM Plex Sans",
+          sans-serif;
+        color: var(--ink);
+        background: transparent;
+        border: 1px solid var(--ink);
+        border-radius: 8px;
+        padding: 10px 16px;
+        cursor: pointer;
+        flex: none;
+      }
+      button.today:hover {
+        background: var(--ink);
+        color: var(--card);
+      }
+      /* ---------- verdict ---------- */
+      .verdict {
+        margin-top: 18px;
+        border-radius: 12px;
+        padding: clamp(20px, 4vw, 30px);
+        color: #fff;
+        position: relative;
+        overflow: hidden;
+      }
+      .verdict.work {
+        background: linear-gradient(150deg, var(--work), var(--work-deep));
+      }
+      .verdict.home {
+        background: linear-gradient(150deg, var(--home), var(--home-deep));
+      }
+      .verdict .date-line {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 13px;
+        opacity: 0.85;
+        margin-bottom: 6px;
+      }
+      .verdict .answer {
+        font-family: "Zilla Slab", serif;
+        font-weight: 700;
+        font-size: clamp(26px, 5.5vw, 38px);
+        line-height: 1.1;
+      }
+      .verdict .detail {
+        margin-top: 10px;
+        font-size: 14px;
+        opacity: 0.92;
+      }
+      .verdict .stamp {
+        position: absolute;
+        right: 18px;
+        top: 18px;
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 11px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        border: 1.5px solid rgba(255, 255, 255, 0.75);
+        border-radius: 999px;
+        padding: 5px 11px;
+        transform: rotate(4deg);
+      }
+      /* ---------- rhythm strip ---------- */
+      .strip-block {
+        margin-top: 22px;
+      }
+      .strip-title {
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: var(--ink-soft);
+        margin-bottom: 10px;
+      }
+      .strip {
+        display: grid;
+        grid-template-columns: repeat(9, 1fr);
+        gap: 6px;
+      }
+      .day {
+        border-radius: 8px;
+        padding: 8px 2px 9px;
+        text-align: center;
+        border: 1px solid var(--line);
+        background: var(--card);
+        transition: transform 120ms ease;
+      }
+      .day .wd {
+        font-size: 10px;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--ink-soft);
+      }
+      .day .num {
+        font-family: "IBM Plex Mono", monospace;
+        font-weight: 500;
+        font-size: 16px;
+        margin-top: 2px;
+      }
+      .day .dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        margin: 6px auto 0;
+        background: var(--home);
+      }
+      .day.on {
+        background: var(--work);
+        border-color: var(--work-deep);
+        color: #fff;
+      }
+      .day.on .wd {
+        color: rgba(255, 255, 255, 0.75);
+      }
+      .day.on .dot {
+        background: #fff;
+      }
+      .day.picked {
+        box-shadow:
+          0 0 0 2px var(--paper),
+          0 0 0 4px var(--ring);
+        transform: translateY(-3px);
+      }
+      .legend {
+        display: flex;
+        gap: 18px;
+        margin-top: 12px;
+        font-size: 12px;
+        color: var(--ink-soft);
+      }
+      .legend span {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .swatch {
+        width: 12px;
+        height: 12px;
+        border-radius: 4px;
+        display: inline-block;
+      }
+      .swatch.w {
+        background: var(--work);
+      }
+      .swatch.h {
+        background: var(--card);
+        border: 1px solid var(--line);
+      }
+      .assume {
+        margin-top: 16px;
+        font-size: 13px;
+        color: var(--ink-soft);
+        border-left: 3px solid var(--line);
+        padding-left: 10px;
+        display: none;
+      }
+      .assume.show {
+        display: block;
+      }
+      footer {
+        margin-top: 28px;
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 11px;
+        color: var(--ink-soft);
+      }
+      @media (max-width: 460px) {
+        .strip {
+          grid-template-columns: repeat(5, 1fr);
+        }
+        .day:nth-child(n + 6) {
+          display: none;
+        }
+        .verdict .stamp {
+          position: static;
+          display: inline-block;
+          margin-bottom: 10px;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .day {
+          transition: none;
+        }
+        .day.picked {
+          transform: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="sheet">
+      <header>
+        <h1>Is Hama working?</h1>
+        <p class="rota-note">
+          <q>Show... Show... Show Me Your A**</q>
+          <cite>By Shwan</cite>
+        </p>
+      </header>
+
+      <div class="picker">
+        <div class="field">
+          <label for="date">Date to check</label>
+          <input type="date" id="date" />
+        </div>
+        <button class="today" id="todayBtn" type="button">Today</button>
+      </div>
+
+      <section class="verdict" id="verdict" aria-live="polite">
+        <p class="date-line" id="dateLine"></p>
+        <p class="answer" id="answer"></p>
+        <p class="detail" id="detail"></p>
+        <span class="stamp" id="stamp"></span>
+      </section>
+
+      <div class="strip-block">
+        <p class="strip-title">The week around it</p>
+        <div class="strip" id="strip"></div>
+        <div class="legend">
+          <span><i class="swatch w"></i> Working</span>
+          <span><i class="swatch h"></i> Home</span>
+        </div>
+      </div>
+
+      <p class="assume" id="assume">
+        This date is before Aug 12, 2026 &mdash; the answer assumes the same
+        rota held back then, which is a guess, not a record.
+      </p>
+
+      <footer>
+        <q style="text-align: justify"
+          >It was true that I didn’t have much ambition, but there ought to be a
+          place for people without ambition, I mean a better place than the one
+          usually reserved. How in the hell could a man enjoy being awakened at
+          6:30 a.m. by an alarm clock, leap out of bed, dress, force-feed, shit,
+          piss, brush teeth and hair, and fight traffic to get to a place where
+          essentially you made lots of money for somebody else and were asked to
+          be grateful for the opportunity to do so?</q
+        >
+        <cite> Charles Bukowski</cite>
+      </footer>
+    </div>
+
+    <script>
+      // ---- the fixed logic: no loop, works for any date in either direction ----
+      const CYCLE = 4;
+      const ANCHOR_UTC = Date.UTC(2026, 7, 12); // last known working day
+
+      // Day difference measured on calendar days via UTC, so DST or time-of-day
+      // can never make a "day" come out as anything but a whole number.
+      function dayDiff(date) {
+        const d = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
+        return Math.round((d - ANCHOR_UTC) / 86400000);
+      }
+
+      function isWorking(date) {
+        const diff = dayDiff(date);
+        return ((diff % CYCLE) + CYCLE) % CYCLE === 0; // negative-safe modulo
+      }
+
+      function daysUntilWork(date) {
+        const m = ((dayDiff(date) % CYCLE) + CYCLE) % CYCLE;
+        return m === 0 ? 0 : CYCLE - m;
+      }
+
+      // ---- UI wiring ----
+      const input = document.getElementById("date");
+      const verdict = document.getElementById("verdict");
+      const answer = document.getElementById("answer");
+      const detail = document.getElementById("detail");
+      const dateLine = document.getElementById("dateLine");
+      const stamp = document.getElementById("stamp");
+      const strip = document.getElementById("strip");
+      const assume = document.getElementById("assume");
+
+      const fmtLong = new Intl.DateTimeFormat("en", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+      const fmtShort = new Intl.DateTimeFormat("en", {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+      });
+      const fmtWd = new Intl.DateTimeFormat("en", { weekday: "short" });
+
+      function toInputValue(d) {
+        const p = (n) => String(n).padStart(2, "0");
+        return (
+          d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate())
+        );
+      }
+
+      function fromInputValue(v) {
+        const [y, m, d] = v.split("-").map(Number);
+        return new Date(y, m - 1, d); // local midnight, no UTC parsing surprises
+      }
+
+      function addDays(d, n) {
+        return new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
+      }
+
+      function render() {
+        if (!input.value) return;
+        const picked = fromInputValue(input.value);
+        const working = isWorking(picked);
+        const cycleDay = (((dayDiff(picked) % CYCLE) + CYCLE) % CYCLE) + 1; // 1..3
+
+        dateLine.textContent = fmtLong.format(picked);
+        verdict.classList.toggle("work", working);
+        verdict.classList.toggle("home", !working);
+        stamp.textContent = "day " + cycleDay + " of " + CYCLE;
+
+        if (working) {
+          answer.textContent = "Hama is working";
+          const next = addDays(picked, CYCLE);
+          detail.textContent =
+            "On shift today. Next working day after this one: " +
+            fmtShort.format(next) +
+            ".";
+        } else {
+          answer.textContent = "Hama is home";
+          const wait = daysUntilWork(picked);
+          const next = addDays(picked, wait);
+          detail.textContent =
+            "Off duty. Back at work on " + fmtShort.format(next) + ".";
+        }
+
+        assume.classList.toggle("show", dayDiff(picked) < 0);
+
+        // rhythm strip: picked date +/- 4 days
+        strip.innerHTML = "";
+        for (let i = -4; i <= 4; i++) {
+          const d = addDays(picked, i);
+          const cell = document.createElement("div");
+          cell.className =
+            "day" + (isWorking(d) ? " on" : "") + (i === 0 ? " picked" : "");
+          cell.innerHTML =
+            '<div class="wd">' +
+            fmtWd.format(d) +
+            "</div>" +
+            '<div class="num">' +
+            d.getDate() +
+            "</div>" +
+            '<div class="dot"></div>';
+          strip.appendChild(cell);
+        }
+      }
+
+      input.addEventListener("change", render);
+      document.getElementById("todayBtn").addEventListener("click", () => {
+        input.value = toInputValue(new Date());
+        render();
+      });
+
+      // start on today
+      input.value = toInputValue(new Date());
+      render();
+    </script>
+  </body>
+</html>
