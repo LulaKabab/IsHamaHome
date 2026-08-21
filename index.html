@@ -48,27 +48,8 @@
         width: 100%;
         max-width: 640px;
       }
-      /* ---------- header ---------- */
       header {
         margin-bottom: clamp(20px, 4vw, 32px);
-      }
-      .eyebrow {
-        font-family: "IBM Plex Mono", monospace;
-        font-size: 12px;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        color: var(--ink-soft);
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        margin-bottom: 10px;
-      }
-      .eyebrow::before {
-        content: "";
-        width: 22px;
-        height: 2px;
-        background: var(--ink);
-        flex: none;
       }
       h1 {
         font-family: "Zilla Slab", serif;
@@ -86,7 +67,6 @@
         color: var(--ink);
         font-weight: 600;
       }
-      /* ---------- picker ---------- */
       .picker {
         background: var(--card);
         border: 1px solid var(--line);
@@ -142,7 +122,6 @@
         background: var(--ink);
         color: var(--card);
       }
-      /* ---------- verdict ---------- */
       .verdict {
         margin-top: 18px;
         border-radius: 12px;
@@ -156,6 +135,9 @@
       }
       .verdict.home {
         background: linear-gradient(150deg, var(--home), var(--home-deep));
+      }
+      .verdict.era {
+        background: linear-gradient(150deg, #46586a, #2b3947);
       }
       .verdict .date-line {
         font-family: "IBM Plex Mono", monospace;
@@ -187,7 +169,6 @@
         padding: 5px 11px;
         transform: rotate(4deg);
       }
-      /* ---------- rhythm strip ---------- */
       .strip-block {
         margin-top: 22px;
       }
@@ -211,6 +192,7 @@
         border: 1px solid var(--line);
         background: var(--card);
         transition: transform 120ms ease;
+        cursor: pointer;
       }
       .day .wd {
         font-size: 10px;
@@ -284,6 +266,20 @@
       .assume.show {
         display: block;
       }
+      .hint {
+        margin-top: 14px;
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 11px;
+        color: var(--ink-soft);
+      }
+      .hint kbd {
+        font-family: inherit;
+        border: 1px solid var(--line);
+        border-bottom-width: 2px;
+        border-radius: 4px;
+        padding: 1px 5px;
+        background: var(--card);
+      }
       footer {
         margin-top: 28px;
         font-family: "IBM Plex Mono", monospace;
@@ -347,9 +343,11 @@
         </div>
       </div>
 
-      <p class="assume" id="assume">
-        This date is before Aug 12, 2026 &mdash; the answer assumes the same
-        rota held back then, which is a guess, not a record.
+      <p class="assume" id="assume"></p>
+
+      <p class="hint">
+        <kbd>&larr;</kbd> <kbd>&rarr;</kbd> step a day &middot;
+        <kbd>Shift</kbd> + <kbd>&larr;</kbd><kbd>&rarr;</kbd> jump a cycle
       </p>
 
       <footer>
@@ -393,6 +391,7 @@
       const stamp = document.getElementById("stamp");
       const strip = document.getElementById("strip");
       const assume = document.getElementById("assume");
+      const stripBlock = document.querySelector(".strip-block");
 
       const fmtLong = new Intl.DateTimeFormat("en", {
         weekday: "long",
@@ -423,17 +422,76 @@
         return new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
       }
 
+      function showEra(text, sub, badge) {
+        verdict.classList.add("era");
+        answer.textContent = text;
+        detail.textContent = sub;
+        stamp.textContent = badge;
+        stripBlock.style.display = "none";
+      }
+
       function render() {
         if (!input.value) return;
         const picked = fromInputValue(input.value);
-        const working = isWorking(picked);
-        const cycleDay = (((dayDiff(picked) % CYCLE) + CYCLE) % CYCLE) + 1;
+        const year = picked.getFullYear();
 
         dateLine.textContent = fmtLong.format(picked);
+        verdict.classList.remove("work", "home", "era");
+        assume.classList.remove("show");
+        strip.innerHTML = "";
+
+        if (year < 1994) {
+          showEra(
+            "You were not even born",
+            "There is nothing to check back here.",
+            "B.H.",
+          );
+          return;
+        }
+
+        if (year <= 2017) {
+          showEra(
+            "You were not working broza",
+            "You probably started in 2018. These were the free years.",
+            "no work",
+          );
+          return;
+        }
+
+        if (year >= 2060) {
+          showEra(
+            "No longer on earth mate!",
+            "Working ends when we do.",
+            "R.I.P",
+          );
+          return;
+        }
+
+        if (year >= 2050) {
+          showEra(
+            "Retired and peacefully living",
+            "No shifts, no alarms, no counting days.",
+            "pension",
+          );
+          return;
+        }
+
+        if (year >= 2030) {
+          showEra(
+            "Hope you're not working there anymore",
+            "If you still are, something went wrong.",
+            "the future",
+          );
+          return;
+        }
+
+        stripBlock.style.display = "";
+        const working = isWorking(picked);
+
         verdict.classList.toggle("work", working);
         verdict.classList.toggle("home", !working);
-        // stamp.textContent = "day " + cycleDay + " of " + CYCLE;
         stamp.textContent = "S.S.D.D";
+
         if (working) {
           answer.textContent = "Hama is working";
           const next = addDays(picked, CYCLE);
@@ -451,7 +509,6 @@
 
         assume.classList.toggle("show", dayDiff(picked) < 0);
 
-        strip.innerHTML = "";
         for (let i = -4; i <= 4; i++) {
           const d = addDays(picked, i);
           const cell = document.createElement("div");
@@ -465,9 +522,28 @@
             d.getDate() +
             "</div>" +
             '<div class="dot"></div>';
+          cell.addEventListener("click", () => {
+            input.value = toInputValue(d);
+            render();
+          });
           strip.appendChild(cell);
         }
       }
+
+      function stepDays(n) {
+        if (!input.value) return;
+        input.value = toInputValue(addDays(fromInputValue(input.value), n));
+        render();
+      }
+
+      window.addEventListener("keydown", (e) => {
+        if (e.target === input) return;
+        if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+        e.preventDefault();
+        const step =
+          (e.key === "ArrowRight" ? 1 : -1) * (e.shiftKey ? CYCLE : 1);
+        stepDays(step);
+      });
 
       input.addEventListener("change", render);
       document.getElementById("todayBtn").addEventListener("click", () => {
